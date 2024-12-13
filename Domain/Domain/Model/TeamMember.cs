@@ -17,6 +17,6 @@ public class TeamMember
 
     [Key, Column(Order = 2)]
     [ForeignKey("Role")]
-    public required Guid RoleId { get; set; }
+    public Guid RoleId { get; set; }
     public virtual Role Role { get; set; } = default!;
 }

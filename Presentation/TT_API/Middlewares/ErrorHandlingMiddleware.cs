@@ -1,5 +1,6 @@
 ﻿using Domain.Exceptions;
 using System.Net;
+using System.Security.Principal;
 
 namespace TT_API.Middlewares;
 public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : IMiddleware
@@ -10,6 +11,13 @@ public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : 
         try
         {
             await next(context);
+        }
+        catch(IdentityException identity)
+        {
+            logger.LogError(identity, "An unhandled exception has occured");
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            await context.Response.WriteAsync(identity.Message);
+
         }
         catch (NotFoundException notFound)
         {

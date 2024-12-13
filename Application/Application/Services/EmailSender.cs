@@ -43,7 +43,7 @@ public class EmailSender(IOptions<SmtpSettings> smtpSettings, ILogger<EmailSende
 
         SmtpClient client = buildClient();
         //Loggin instead of sending email
-        logger.LogInformation($"Email sent to {email} with subject {subject} and message {htmlMessage}");
+        logger.LogInformation($"Email sent to {email} with subject {subject} and message \n{htmlMessage}\n");
         //return client.SendMailAsync(
         //    new MailMessage("no-reply@yourdomain.com", email, subject, htmlMessage)
         //    {
