@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using TT_API.Middlewares;
+using TT_API.Middlewares.Swagger;
 
 namespace TT_API.Extensions
 {
@@ -10,15 +12,19 @@ namespace TT_API.Extensions
     {
         public static void AddPresentation(this WebApplicationBuilder builder)
         {
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                  .AddCookie(options =>
-                  {
-                      options.LoginPath = "/Account/Login";
-                      options.AccessDeniedPath = "/Account/AccessDenied";
-                      options.Cookie.Name = "YourAppCookie";
-                      options.Cookie.HttpOnly = true;
-                      options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                  });
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+            })
+                .AddCookie(IdentityConstants.ApplicationScheme, options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.Cookie.Name = "YourAppCookie";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                });
             builder.Services.AddControllers();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -37,6 +43,15 @@ namespace TT_API.Extensions
                             new string[] {}
                         }
                 });
+
+
+
+                // Chemin du fichier de commentaires XML
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+                // Ajouter le filtre pour les exemples de réponses
+                c.OperationFilter<SwaggerResponseStatusCodeFilter>();
 
             });
 

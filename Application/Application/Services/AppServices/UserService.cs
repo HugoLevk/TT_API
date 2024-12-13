@@ -1,4 +1,7 @@
-﻿using Domain.Model;
+﻿using Application.Users.DTOs;
+using AutoMapper;
+using Domain.Exceptions;
+using Domain.Model;
 using Domain.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +12,7 @@ namespace Application.Services.AppServices;
 /// <summary>
 /// Service for managing users, roles, and project assignments.
 /// </summary>
-public class UserService(IUserRepository _userRepository, IEmailSender<User> _emailSender, IConfiguration _configuration, ILogger<UserService> _logger)
+public class UserService(IUserRepository _userRepository, IEmailSender<User> _emailSender, IConfiguration _configuration, ILogger<UserService> _logger, IMapper mapper) : IUserService
 {
     /// <summary>
     /// Adds a new user with the specified email, password, and role.
@@ -19,11 +22,11 @@ public class UserService(IUserRepository _userRepository, IEmailSender<User> _em
     /// <param name="role">The role to assign to the new user.</param>
     /// <returns>The ID of the newly created user.</returns>
     /// <exception cref="Exception">Thrown when user creation fails.</exception>
-    public async Task<Guid> AddUser(string email, string password, string role)
+    public async Task<Guid> AddUser(string userName, string email, string password, string role)
     {
         _logger.LogInformation("Adding a new user with email: {Email}", email);
-         
-        Guid result = await _userRepository.AddUser(email, password,role);
+
+        Guid result = await _userRepository.AddUser(userName, email, password, role);
 
         _logger.LogInformation("User created successfully with ID: {UserId}", result);
 
@@ -65,5 +68,20 @@ public class UserService(IUserRepository _userRepository, IEmailSender<User> _em
     {
         _logger.LogInformation("Assigning project {ProjectId} to user with ID: {UserId} and role: {Role}", projectId, userId, role);
         return await _userRepository.AssignProject(userId, projectId, role);
+    }
+
+    public async Task<UserDto> GetUserByName(string userName)
+    {
+        _logger.LogInformation("Getting user by name: {UserName}", userName);
+        User result = await _userRepository.GetUserByName(userName) ?? throw new NotFoundException("user", userName);
+        return mapper.Map<UserDto>(result!);
+    }
+
+    public async Task<UserDto> GetUserByEmail(string userMail)
+    {
+        _logger.LogInformation("Getting user by email: {UserMail}", userMail);
+        User result = await _userRepository.GetUserByEmail(userMail) ?? throw new NotFoundException("user", userMail);
+        UserDto resultMap = mapper.Map<UserDto>(result!);
+        return resultMap;
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Domain.Model;
+using Domain.Repositories;
 using Infrastructure.Persistence;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +20,12 @@ public static class ServiceCollectionExtensions
         else
             connectionString = configuration.GetConnectionString("TTWADB")!;
         services.AddDbContext<ProjectsDbContext>(options => options.UseSqlServer(connectionString)
-                .EnableSensitiveDataLogging());
+                .EnableSensitiveDataLogging()); 
+
+
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IProjectsRepository, ProjectRepository>();
 
         // Apply migrations at startup only if running in Docker
         if (IsRunningInDocker())
@@ -33,6 +40,7 @@ public static class ServiceCollectionExtensions
         }
 
         services.AddIdentityCore<User>()
+            .AddRoles<Role>()
             .AddEntityFrameworkStores<ProjectsDbContext>()
             .AddDefaultTokenProviders()
             .AddSignInManager()

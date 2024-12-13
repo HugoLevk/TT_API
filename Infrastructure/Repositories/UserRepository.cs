@@ -42,18 +42,18 @@ internal class UserRepository(ProjectsDbContext _projectsDbContext, UserManager<
     /// <param name="password">The password of the user.</param>
     /// <param name="role">The role of the user.</param>
     /// <returns>The number of state entries written to the database.</returns>
-    public async Task<Guid> AddUser(string email, string password, string role)
+    public async Task<Guid> AddUser(string userName, string email, string password, string role)
     {
         var user = new User
-        {
+        { 
             Email = email,
-            UserName = email
+            UserName = userName
         };
 
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
-            throw new Exception("Failed to create user: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            throw new IdentityException("Failed to create user: " , result.Errors);
         }
 
         var roleEntity = await _projectsDbContext.Roles.FirstOrDefaultAsync(r => r.Name == role) ?? throw new NotFoundException("role", role);
@@ -111,4 +111,33 @@ internal class UserRepository(ProjectsDbContext _projectsDbContext, UserManager<
         await _projectsDbContext.SaveChangesAsync();
         return true;
     }
+    /// <summary>
+    /// Retrieves a user by their username.
+    /// </summary>
+    /// <param name="userName">The username of the user.</param>
+    /// <returns>The user with the specified username.</returns>
+    public async Task<User> GetUserByName(string userName)
+    {
+        var user = await _projectsDbContext.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        if (user == null)
+        {
+            throw new NotFoundException("user", userName);
+        }
+        return user;
+    }
+
+    /// <summary>
+    /// Retrieves a user by their email.
+    /// </summary>
+    /// <param name="userMail">The email of the user.</param>
+    /// <returns>The user with the specified email.</returns>
+    public async Task<User> GetUserByEmail(string userMail)
+    {
+        var user = await _projectsDbContext.Users.FirstOrDefaultAsync(u => u.Email == userMail);
+        if (user == null)
+        {
+            throw new NotFoundException("user", userMail);
+        }
+        return user;
+    } 
 }
