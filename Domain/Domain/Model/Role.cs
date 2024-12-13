@@ -5,6 +5,8 @@ namespace Domain.Model;
 
 public class Role : IdentityRole<Guid>
 {
+
+    [Key]
     public override Guid Id { get; set; }
     [Required]
     [MaxLength(50)]

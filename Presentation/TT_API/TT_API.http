@@ -1,4 +1,4 @@
-@TT_API_HostAddress = http://localhost:5001
+@TT_API_HostAddress = http://localhost:5295
 
 GET {{TT_API_HostAddress}}/weatherforecast/
 Accept: application/json

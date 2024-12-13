@@ -1,5 +1,4 @@
 ﻿using Domain.Model;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +20,8 @@ public class ProjectsDbContext(DbContextOptions<ProjectsDbContext> dbContextOpti
 
         // Clé composite pour TeamMember
         builder.Entity<TeamMember>()
-            .HasKey(tm => new { tm.ProjectId, tm.UserId, tm.RoleId });
+            .HasKey(tm => new { tm.ProjectId, tm.UserId, tm.RoleId })
+            .HasName("PK_TeamMember");
 
         builder.Entity<TeamMember>()
             .HasOne(tm => tm.Project)

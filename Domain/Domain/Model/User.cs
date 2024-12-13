@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Model;
 
 public class User : IdentityUser<Guid>
 {
+    [Key()]
     public override Guid Id { get; set; }
 
     [MaxLength(100)]

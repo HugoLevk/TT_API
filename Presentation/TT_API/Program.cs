@@ -1,5 +1,9 @@
+using Application.Extensions;
 using Domain.Model;
 using Infrastructure.Extensions;
+using Serilog;
+using TT_API.Extensions;
+using TT_API.Middlewares;
 
 namespace TT_API;
 
@@ -9,10 +13,18 @@ namespace TT_API;
     {
         var builder = WebApplication.CreateBuilder(args);
 
+
+        builder.AddPresentation();
+
         // Add services to the container.
         builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddApplication(builder.Configuration);
 
         builder.Services.AddControllers();
+
+        // Register data protection services
+        builder.Services.AddDataProtection();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
 
@@ -25,6 +37,11 @@ namespace TT_API;
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
+        app.UseMiddleware<ErrorHandlingMiddleware>();
+
+        app.UseSerilogRequestLogging();
+
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -33,7 +50,11 @@ namespace TT_API;
 
         app.UseHttpsRedirection();
 
-        app.MapIdentityApi<User>();
+        app.MapGroup("api/Identity")
+            .WithTags("Identity")
+            .MapIdentityApi<User>();
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 
